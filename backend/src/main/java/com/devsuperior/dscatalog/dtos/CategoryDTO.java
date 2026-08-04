@@ -26,6 +26,10 @@ public class CategoryDTO implements Serializable{
 		this.id = entity.getId();
 		this.name = entity.getName();
 	}
+	
+	public Category dtoToEntity() {
+		return new Category(id, name);
+	}
 
 	public Long getId() {
 		return id;
