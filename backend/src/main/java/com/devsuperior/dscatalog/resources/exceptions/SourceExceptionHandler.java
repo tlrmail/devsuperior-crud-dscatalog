@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.devsuperior.dscatalog.services.exceptions.DataBaseException;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoudException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,4 +27,15 @@ public class SourceExceptionHandler {
 		
 	}
 	
+	@ExceptionHandler(DataBaseException.class)
+	public ResponseEntity<StandartError> dataBase(DataBaseException e, HttpServletRequest http){
+		StandartError err = new StandartError();
+		err.setTimestamp(Instant.now());
+		err.setStatus(HttpStatus.BAD_REQUEST.value());
+		err.setError("Database exception.");
+		err.setMessage(e.getMessage());
+		err.setPath(http.getRequestURI());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
+		
+	}
 }
