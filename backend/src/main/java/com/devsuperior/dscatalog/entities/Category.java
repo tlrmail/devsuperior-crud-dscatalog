@@ -75,7 +75,7 @@ public class Category implements Serializable{
 	public void preUpdate() {
 		updateAt = Instant.now();
 	}
-
+	
 	@Override
 	public int hashCode() {
 		return Objects.hash(id);
