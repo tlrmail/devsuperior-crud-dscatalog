@@ -11,62 +11,63 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.devsuperior.dscatalog.dtos.CategoryDTO;
-import com.devsuperior.dscatalog.entities.Category;
-import com.devsuperior.dscatalog.repositories.CategoryRepository;
+import com.devsuperior.dscatalog.dtos.ProductDTO;
+import com.devsuperior.dscatalog.entities.Product;
+import com.devsuperior.dscatalog.repositories.ProductRepository;
 import com.devsuperior.dscatalog.services.exceptions.DataBaseException;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoudException;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
-public class CategoryService {
+public class ProductService {
 
 	@Autowired
-	private CategoryRepository repository;
+	private ProductRepository repository;
 
 	@Transactional(readOnly = true)
-	public List<CategoryDTO> findAll() {
-		List<Category> list = repository.findAll();
-		List<CategoryDTO> dtos = list.stream().map(category -> new CategoryDTO(category)).toList();
-		return dtos;
-	}
-	
-	@Transactional(readOnly = true)
-	public Page<CategoryDTO> findAllPaged(PageRequest pageRequest) {
-		Page<Category> list = repository.findAll(pageRequest);
-		Page<CategoryDTO> dtos = list.map(category -> new CategoryDTO(category));
+	public List<ProductDTO> findAll() {
+		List<Product> list = repository.findAll();
+		List<ProductDTO> dtos = list.stream().map(prod -> new ProductDTO(prod)).toList();
 		return dtos;
 	}
 
 	@Transactional(readOnly = true)
-	public CategoryDTO findById(Long id) {
-		Optional<Category> obj = repository.findById(id);
-		Category entity = obj.orElseThrow(() -> new ResourceNotFoudException("Entity not found!"));
-		CategoryDTO dto = new CategoryDTO(entity);
+	public Page<ProductDTO> findAllPaged(PageRequest pageRequest) {
+		Page<Product> list = repository.findAll(pageRequest);
+		Page<ProductDTO> dtos = list.map(prod -> new ProductDTO(prod));
+		return dtos;
+	}
+
+	@Transactional(readOnly = true)
+	public ProductDTO findById(Long id) {
+		Optional<Product> obj = repository.findById(id);
+		Product entity = obj.orElseThrow(() -> new ResourceNotFoudException("Entity not found!"));
+		ProductDTO dto = new ProductDTO(entity, entity.getCategories());
 		return dto;
+
 	}
 
 	@Transactional(readOnly = false)
-	public CategoryDTO insert(CategoryDTO dto) {
-		Category entity = repository.save(dto.dtoToEntity());
-		return new CategoryDTO(entity);
+	public ProductDTO insert(ProductDTO dto) {
+		Product entity = repository.save(dto.dtoToEntity());
+		return new ProductDTO(entity);
 	}
 
 	@Transactional(readOnly = false)
-	public CategoryDTO update(CategoryDTO dto, Long id) {
+	public ProductDTO update(Long id, ProductDTO dto) {
 		try {
-			Category entity = repository.getReferenceById(id);
-			entity.setName(dto.getName());
-			entity = repository.save(entity);
-			return new CategoryDTO(entity);
+			Product entity = repository.getReferenceById(id);
+			dto.setId(id);
+			entity = repository.save(dto.dtoToEntity());
+			return new ProductDTO(entity);
 		} catch (EntityNotFoundException e) {
 			throw new ResourceNotFoudException("Id not found: " + id);
 		}
 	}
 
 	@Transactional(propagation = Propagation.SUPPORTS)
-	public void delete(Long id) {
+	public void deleteById(Long id) {
 		if (!repository.existsById(id)) {
 			throw new ResourceNotFoudException("Id not found: " + id);
 		}
@@ -76,4 +77,5 @@ public class CategoryService {
 			throw new DataBaseException("Falha de integridade referencial.");
 		}
 	}
+
 }
