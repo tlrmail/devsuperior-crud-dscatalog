@@ -2,6 +2,7 @@ package com.devsuperior.dscatalog.services;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.devsuperior.dscatalog.dtos.ProductDTO;
+import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.entities.Product;
 import com.devsuperior.dscatalog.repositories.ProductRepository;
 import com.devsuperior.dscatalog.services.exceptions.DataBaseException;
@@ -35,7 +37,7 @@ public class ProductService {
 	@Transactional(readOnly = true)
 	public Page<ProductDTO> findAllPaged(PageRequest pageRequest) {
 		Page<Product> list = repository.findAll(pageRequest);
-		Page<ProductDTO> dtos = list.map(prod -> new ProductDTO(prod));
+		Page<ProductDTO> dtos = list.map(prod -> (new ProductDTO(prod, prod.getCategories())));
 		return dtos;
 	}
 
@@ -51,7 +53,8 @@ public class ProductService {
 	@Transactional(readOnly = false)
 	public ProductDTO insert(ProductDTO dto) {
 		Product entity = repository.save(dto.dtoToEntity());
-		return new ProductDTO(entity);
+		Set<Category> categories = entity.getCategories();
+		return new ProductDTO(entity, categories);
 	}
 
 	@Transactional(readOnly = false)
@@ -60,7 +63,8 @@ public class ProductService {
 			Product entity = repository.getReferenceById(id);
 			dto.setId(id);
 			entity = repository.save(dto.dtoToEntity());
-			return new ProductDTO(entity);
+			Set<Category> categories = entity.getCategories();
+			return new ProductDTO(entity, categories);
 		} catch (EntityNotFoundException e) {
 			throw new ResourceNotFoudException("Id not found: " + id);
 		}

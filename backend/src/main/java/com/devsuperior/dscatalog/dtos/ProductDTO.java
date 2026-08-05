@@ -3,6 +3,7 @@ package com.devsuperior.dscatalog.dtos;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -20,7 +21,7 @@ public class ProductDTO implements Serializable{
 	private String imgUrl;
 	private Instant moment;
 
-	private List<CategoryDTO> categoriesDTO = new ArrayList<>();
+	private Set<CategoryDTO> categoriesDTO = new HashSet<>();
 
 	public ProductDTO() {
 		// TODO Auto-generated constructor stub
@@ -51,8 +52,7 @@ public class ProductDTO implements Serializable{
 
 	public Product dtoToEntity() {
 		Product entity = new Product(id, name, description, price, imgUrl, moment);
-		List<Category> list = this.categoriesDTO.stream().map(dto -> dto.dtoToEntity()).toList();
-		list.forEach(cat -> entity.getCategories().add(cat));
+		this.categoriesDTO.forEach(catDTO -> entity.getCategories().add(catDTO.dtoToEntity()));
 		return entity;
 	}
 
@@ -104,7 +104,7 @@ public class ProductDTO implements Serializable{
 		this.moment = moment;
 	}
 
-	public List<CategoryDTO> getCategoriesDTO() {
+	public Set<CategoryDTO> getCategoriesDTO() {
 		return categoriesDTO;
 	}
 	
